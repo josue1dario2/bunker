@@ -1,0 +1,23 @@
+# Compilados
+build/
+*.o
+*.a
+*.so
+
+# Ejecutables
+bunker_game
+*.exe
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs (generados en runtime)
+data/log_experimento.txt
