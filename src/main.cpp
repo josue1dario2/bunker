@@ -36,6 +36,7 @@ void mostrarMenu() {
     cout << "5. Aceptar grupo solicitante" << endl;
     cout << "6. Rechazar grupo solicitante" << endl;
     cout << "7. Ver instrucciones" << endl;
+    cout << "8. Ver coaliciones activas" << endl;
     cout << "0. Salir" << endl;
     cout << "─────────────────────────────────────────" << endl;
 }
@@ -200,6 +201,10 @@ int main() {
         }
         case 7: {
             mostrarInstrucciones();
+            break;
+        }
+        case 8: {
+            bunker.listarCoaliciones();
             break;
         }
         case 0: {

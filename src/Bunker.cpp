@@ -1,9 +1,11 @@
 #include "../include/Bunker.h"
 #include "../include/Estrategia.h"
+#include "../include/Coalicion.h"
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 
 Bunker::Bunker()
     : oxigeno(1000), energia(500), medicina(200),
@@ -183,7 +185,12 @@ bool Bunker::procesarDia() {
 
     cout << "\n⏳ Procesando Día " << diaActual << "..." << endl;
 
+    // Procesar consumos normales
     procesarConsumos();
+
+    // SISTEMA DE COALICIONES - Formar y procesar
+    formarCoaliciones();      // Los grupos se alían si es necesario
+    procesarCoaliciones();    // Las coaliciones actúan
 
     if (!verificarCatastrofe()) {
         return false;
@@ -283,4 +290,148 @@ void Bunker::restarEnergia(int cantidad) {
 
 void Bunker::restarMedicina(int cantidad) {
     medicina -= cantidad;
+}
+
+// ═════════════════════════════════════════════════════════════════
+// SISTEMA DE COALICIONES - Dinámicas emergentes
+// ═════════════════════════════════════════════════════════════════
+
+void Bunker::formarCoaliciones() {
+    if (habitantes.size() < 2) {
+        return;  // Se necesitan al menos 2 grupos para una coalición
+    }
+
+    // Lógica de formación de coaliciones basada en características
+    // Los grupos se alían si:
+    // 1. Tienen moral similar
+    // 2. Comparten intereses (p.ej., ambos rechazados)
+    // 3. Están en peligro común
+
+    // Buscar grupos rechazados que se alíen por supervivencia
+    vector<Grupo*> gruposRechazados;
+    for (Grupo* g : habitantes) {
+        // Si la estrategia actual es rechazo, el grupo está aliándose
+        if (g->obtenerRiesgoEstrategia() > 70 && g->obtenerMoral() < 40) {
+            gruposRechazados.push_back(g);
+        }
+    }
+
+    // Formar coalición de grupos rechazados
+    if (gruposRechazados.size() >= 2) {
+        // Verificar si ya existe una coalición de sabotaje
+        bool yaExiste = false;
+        for (Coalicion& c : coaliciones) {
+            if (c.obtenerObjetivo() == "sabotaje" && c.esAceptada()) {
+                yaExiste = true;
+                break;
+            }
+        }
+
+        if (!yaExiste) {
+            Coalicion nuevaCoalicion("sabotaje");
+            for (Grupo* g : gruposRechazados) {
+                nuevaCoalicion.agregarGrupo(g);
+            }
+            nuevaCoalicion.activar();
+            coaliciones.push_back(nuevaCoalicion);
+
+            cout << "\n⚠ ALERTA: Se ha formado una coalición de "
+                 << gruposRechazados.size() << " grupos con objetivo de SABOTAJE." << endl;
+            escribirLog("COALICIÓN FORMADA: " + to_string(gruposRechazados.size()) +
+                       " grupos se alían para sabotaje.");
+        }
+    }
+
+    // Lógica de coalición de poder (grupos que buscan control)
+    vector<Grupo*> gruposPeligrosos;
+    for (Grupo* g : habitantes) {
+        if (g->obtenerTipo() == "Saqueador" && g->obtenerMoral() < 60) {
+            gruposPeligrosos.push_back(g);
+        }
+    }
+
+    if (gruposPeligrosos.size() >= 1) {
+        bool yaExiste = false;
+        for (Coalicion& c : coaliciones) {
+            if (c.obtenerObjetivo() == "poder" && c.esAceptada()) {
+                yaExiste = true;
+                break;
+            }
+        }
+
+        if (!yaExiste) {
+            Coalicion nuevaCoalicion("poder");
+            for (Grupo* g : gruposPeligrosos) {
+                nuevaCoalicion.agregarGrupo(g);
+            }
+            nuevaCoalicion.activar();
+            coaliciones.push_back(nuevaCoalicion);
+
+            cout << "\n🚨 ALERTA CRÍTICA: Se detecta coalición de PODER." << endl;
+            escribirLog("COALICIÓN FORMADA: Grupos buscan control del búnker.");
+        }
+    }
+}
+
+void Bunker::procesarCoaliciones() {
+    if (coaliciones.empty()) {
+        return;
+    }
+
+    for (size_t i = 0; i < coaliciones.size(); ++i) {
+        Coalicion& c = coaliciones[i];
+
+        if (!c.esAceptada()) {
+            continue;
+        }
+
+        // Procesar día de la coalición
+        c.procesarDia();
+
+        // Verificar si intenta golpe
+        if (c.intentaraGolpe()) {
+            salud -= 30;
+            moralScore -= 20;
+            escribirLog("INTENTO DE GOLPE: Coalición de " + c.obtenerObjetivo() + ".");
+        }
+
+        // Verificar si se disuelve
+        if (c.seDisolvera()) {
+            cout << "\n✓ La coalición de " << c.obtenerObjetivo() << " se ha disuelto." << endl;
+            c.desactivar();
+            escribirLog("Coalición disuelta.");
+        }
+    }
+}
+
+void Bunker::verificarGolpesDEstado() {
+    // Esta función se llama después de procesarCoaliciones
+    // Los golpes ya se han procesado en procesarCoaliciones
+}
+
+void Bunker::listarCoaliciones() {
+    if (coaliciones.empty()) {
+        cout << "\n⚪ No hay coaliciones activas." << endl;
+        return;
+    }
+
+    cout << "\n🔗 COALICIONES ACTIVAS:" << endl;
+    for (size_t i = 0; i < coaliciones.size(); ++i) {
+        if (!coaliciones[i].esAceptada()) {
+            continue;
+        }
+
+        cout << "\nCoalición " << (i + 1) << ":" << endl;
+        cout << "  Objetivo: " << coaliciones[i].obtenerObjetivo() << endl;
+        cout << "  Miembros: " << coaliciones[i].obtenerNumeroMiembros() << endl;
+        cout << "  Fuerza: " << coaliciones[i].obtenerFuerzaTotal() << endl;
+        cout << "  Unidad: " << coaliciones[i].obtenerUnidad() << "%" << endl;
+        cout << "  Riesgo: " << coaliciones[i].calcularRiesgoConjunto() << "%" << endl;
+
+        cout << "  Grupos:" << endl;
+        for (Grupo* g : coaliciones[i].obtenerMiembros()) {
+            cout << "    - " << g->obtenerTipo() << " (" << g->obtenerNombre() << ")"
+                 << ", Moral: " << g->obtenerMoral() << "%" << endl;
+        }
+    }
 }

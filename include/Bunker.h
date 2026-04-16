@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include "Grupo.h"
+#include "Coalicion.h"
 
 using namespace std;
 
@@ -24,6 +25,9 @@ private:
     // Habitantes
     vector<Grupo*> habitantes;
 
+    // SISTEMA DE COALICIONES - Dinámicas emergentes
+    vector<Coalicion> coaliciones;
+
     // Archivos
     ofstream logExperimento;
 
@@ -31,6 +35,9 @@ private:
     void escribirLog(string mensaje);
     void procesarConsumos();
     bool verificarCatastrofe();
+    void procesarCoaliciones();
+    void formarCoaliciones();
+    void verificarGolpesDEstado();
 
 public:
     Bunker();
@@ -46,6 +53,10 @@ public:
     bool aceptarGrupo(int indiceGrupo);  // El jugador acepta un grupo
     bool rechazarGrupo(int indiceGrupo); // El jugador rechaza un grupo
     void listarHabitantes();
+
+    // Gestión de coaliciones
+    void listarCoaliciones();
+    int obtenerNumeroCoaliciones() const { return coaliciones.size(); }
 
     // Getters
     int obtenerOxigeno() const { return oxigeno; }
