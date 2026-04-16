@@ -80,7 +80,7 @@ void Bunker::añadirGrupo(Grupo* grupo) {
 }
 
 bool Bunker::aceptarGrupo(int indiceGrupo) {
-    if (indiceGrupo < 0 || indiceGrupo >= habitantes.size()) {
+    if (indiceGrupo < 0 || indiceGrupo >= (int)habitantes.size()) {
         return false;
     }
 
@@ -109,7 +109,7 @@ bool Bunker::aceptarGrupo(int indiceGrupo) {
 }
 
 bool Bunker::rechazarGrupo(int indiceGrupo) {
-    if (indiceGrupo < 0 || indiceGrupo >= habitantes.size()) {
+    if (indiceGrupo < 0 || indiceGrupo >= (int)habitantes.size()) {
         return false;
     }
 
@@ -261,7 +261,7 @@ void Bunker::generarFinales() {
 
 void Bunker::listarHabitantes() {
     cout << "\n📋 Habitantes del búnker:" << endl;
-    for (int i = 0; i < habitantes.size(); i++) {
+    for (size_t i = 0; i < habitantes.size(); i++) {
         cout << i << ". " << habitantes[i]->obtenerTipo() << " - "
              << habitantes[i]->obtenerNombre() << " (" << habitantes[i]->obtenerMiembros()
              << " miembros, Moral: " << habitantes[i]->obtenerMoral() << "%)" << endl;
