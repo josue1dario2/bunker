@@ -1,4 +1,5 @@
 #include "../include/Bunker.h"
+#include "../include/Estrategia.h"
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -84,6 +85,13 @@ bool Bunker::aceptarGrupo(int indiceGrupo) {
     Grupo* grupo = habitantes[indiceGrupo];
     grupo->reaccionarAEvento("aceptado");
 
+    // PATRÓN STRATEGY: Cambiar estrategia del grupo a "Aceptación"
+    grupo->establecerEstrategia(new EstrategiaAceptacion());
+
+    // Mostrar la reacción estratégica
+    cout << "\n>>> " << grupo->ejecutarEstrategia() << endl;
+    cout << "Estrategia: " << grupo->obtenerNombreEstrategia() << endl;
+
     // Restar recursos inmediatamente
     restarOxigeno(grupo->calcularConsumoOxigeno());
     restarEnergia(grupo->calcularConsumoEnergia());
@@ -92,7 +100,8 @@ bool Bunker::aceptarGrupo(int indiceGrupo) {
     // Aumentar moral del jugador por empatía
     moralScore += 10;
 
-    escribirLog("ACEPTADO: " + grupo->obtenerNombre() + " - Recursos gastados.");
+    escribirLog("ACEPTADO: " + grupo->obtenerNombre() +
+                " [Estrategia: " + grupo->obtenerNombreEstrategia() + "]");
 
     return true;
 }
@@ -105,10 +114,20 @@ bool Bunker::rechazarGrupo(int indiceGrupo) {
     Grupo* grupo = habitantes[indiceGrupo];
     grupo->reaccionarAEvento("rechazado");
 
+    // PATRÓN STRATEGY: Cambiar estrategia del grupo a "Rechazo"
+    grupo->establecerEstrategia(new EstrategiaRechazo());
+
+    // Mostrar la reacción estratégica
+    cout << "\n>>> " << grupo->ejecutarEstrategia() << endl;
+    cout << "Estrategia: " << grupo->obtenerNombreEstrategia() << endl;
+    cout << "⚠ Riesgo de sabotaje: " << grupo->obtenerRiesgoEstrategia() << "%" << endl;
+
     // Disminuir moral del jugador
     moralScore -= 15;
 
-    escribirLog("RECHAZADO: " + grupo->obtenerNombre() + " - Moral afectada.");
+    escribirLog("RECHAZADO: " + grupo->obtenerNombre() +
+                " [Estrategia: " + grupo->obtenerNombreEstrategia() +
+                " - Riesgo: " + to_string(grupo->obtenerRiesgoEstrategia()) + "%]");
 
     return true;
 }

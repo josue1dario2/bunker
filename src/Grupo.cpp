@@ -1,7 +1,11 @@
 #include "../include/Grupo.h"
+#include "../include/Estrategia.h"
 #include <iostream>
 
-Grupo::Grupo(string n, int m) : nombre(n), miembros(m), hambre(0), moral(100) {}
+Grupo::Grupo(string n, int m) : nombre(n), miembros(m), hambre(0), moral(100) {
+    // Inicializar con estrategia neutra por defecto
+    estrategiaActual = make_unique<EstrategiaNeutra>();
+}
 
 Grupo::~Grupo() {}
 
@@ -32,4 +36,43 @@ string Grupo::obtenerNombre() const {
 
 int Grupo::obtenerMoral() const {
     return moral;
+}
+
+// ═════════════════════════════════════════════════════════════════
+// PATRÓN STRATEGY - Implementación
+// ═════════════════════════════════════════════════════════════════
+
+void Grupo::establecerEstrategia(Estrategia* nueva) {
+    if (nueva != nullptr) {
+        // Usar reset para tomar posesión del puntero
+        estrategiaActual.reset(nueva);
+    }
+}
+
+string Grupo::ejecutarEstrategia() {
+    if (estrategiaActual) {
+        return estrategiaActual->ejecutar();
+    }
+    return "Sin estrategia definida.";
+}
+
+int Grupo::obtenerRiesgoEstrategia() const {
+    if (estrategiaActual) {
+        return estrategiaActual->calcularRiesgo();
+    }
+    return 0;
+}
+
+int Grupo::obtenerBeneficioEstrategia() const {
+    if (estrategiaActual) {
+        return estrategiaActual->calcularBeneficio();
+    }
+    return 0;
+}
+
+string Grupo::obtenerNombreEstrategia() const {
+    if (estrategiaActual) {
+        return estrategiaActual->obtenerNombre();
+    }
+    return "Desconocida";
 }

@@ -2,7 +2,11 @@
 #define GRUPO_H
 
 #include <string>
+#include <memory>
 using namespace std;
+
+// Forward declaration
+class Estrategia;
 
 // Clase base abstracta para los grupos de sobrevivientes
 class Grupo {
@@ -11,6 +15,9 @@ protected:
     int miembros;
     int hambre;        // Estado de necesidad
     int moral;         // Estado emocional del grupo
+
+    // PATRÓN STRATEGY: Composición de algoritmos
+    unique_ptr<Estrategia> estrategiaActual;
 
 public:
     Grupo(string n, int m);
@@ -31,6 +38,13 @@ public:
     int obtenerMiembros() const;
     string obtenerNombre() const;
     int obtenerMoral() const;
+
+    // PATRÓN STRATEGY: Métodos para cambiar comportamiento dinámicamente
+    void establecerEstrategia(Estrategia* nueva);
+    string ejecutarEstrategia();
+    int obtenerRiesgoEstrategia() const;
+    int obtenerBeneficioEstrategia() const;
+    string obtenerNombreEstrategia() const;
 };
 
 #endif

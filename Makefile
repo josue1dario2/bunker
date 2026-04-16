@@ -9,6 +9,7 @@ BUILD_DIR = build
 SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/Bunker.cpp \
           $(SRC_DIR)/Grupo.cpp \
+          $(SRC_DIR)/Estrategia.cpp \
           $(SRC_DIR)/Ingeniero.cpp \
           $(SRC_DIR)/Medico.cpp \
           $(SRC_DIR)/Civil.cpp \
